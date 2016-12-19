@@ -1,5 +1,14 @@
 #!/usr/bin/python
 
+# Examples:
+#  trackrtool token
+#  trackrtool list
+#  trackrtool get  0000d446-3ac6fbc3
+#  trackrtool create TestTracker2 Bluetooth 00000042-00000002 trackr
+#  trackrtool set 00000042-00000002 50 44.44 55.99 1
+#  trackrtool list
+#  trackrtool delete 00000042-00000002
+
 import trackr
 import sys
 import pprint
