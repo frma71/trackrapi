@@ -10,47 +10,52 @@ cmd = sys.argv[1]
 t = trackr.Trackr()
 pp=pprint.PrettyPrinter(indent=4)
 
-try:
-    token = os.environ["TRACKR_TOKEN"]
-except KeyError:
-    token = None
 
-
-if not token:
+def getToken():
     try:
-        user=os.environ["TRACKR_USER"]
+        token = os.environ["TRACKR_TOKEN"]
     except KeyError:
-        print "Trackr username: ",
-        user=sys.stdin.readline().rstrip("\n")
-        print "\r",
-        
-    try:    
-        password=os.environ["TRACKR_PASSWORD"]
-    except KeyError:
-        print "Trackr password: ",
-        password=sys.stdin.readline().rstrip("\n")
-        print "\r",
-        print "Getting token for " + user
-    token = t.getToken(user, password)
-print("Got Token:" + token)
+        token = None
+    if not token:
+        try:
+            user=os.environ["TRACKR_USER"]
+        except KeyError:
+            print "Trackr username: ",
+            user=sys.stdin.readline().rstrip("\n")
+            print "\r",
+        try:    
+            password=os.environ["TRACKR_PASSWORD"]
+        except KeyError:
+            print "Trackr password: ",
+            password=sys.stdin.readline().rstrip("\n")
+            print "\r",
+            print "Getting token for " + user
+        token = t.getToken(user, password)
+    return token
 
-
-
-
-if cmd == "list":
+if cmd == "token":
+    print(getToken())
+elif cmd == "list":
+    token = getToken()
     trackers=t.getTrackers(token)
+    print("{:<20s} {:<20s} {:2s} {:8.5s} {:8.5s} {}".format(
+        "Name", "TokenID", "Bat", "Lat","Long","Last Seen"));
     for tracker in trackers:
-        print "%-20s %-20s %3d%% at %.5f,%.5f %s" % (
+        print("{:<20s} {:<20s} {:2d}% {:8.5f} {:8.5f} {}".format(
             tracker['customName'],
             tracker['trackerId'],
             int(tracker['batteryLevel']),
             float(tracker['lastKnownLocation']['latitude']),
             float(tracker['lastKnownLocation']['longitude']),
-            tracker['lastTimeSeen'])
+            tracker['lastTimeSeen']))
+elif cmd == "featurever":
+    token = getToken()    
+    print("{}".format(t.getFeatureVersion(token)))
 elif cmd == "get":
+    token = getToken()
     tracker=t.getTracker(token,sys.argv[2])
     for k in tracker:
-        print "%s: %s" % (k, tracker[k])
+        print("{}: {}".format(k, tracker[k]))
 elif cmd == "set":
     id = sys.argv[2]
     bat = int(sys.argv[3])
@@ -64,13 +69,16 @@ elif cmd == "set":
     else:
         print("Fail")
 elif cmd == "create":
+    token = getToken()
     name = sys.argv[2]
     type = sys.argv[3]
     id = sys.argv[4]
     icon = sys.argv[5]
     print(t.createItemWithTracker(token, name, type, id, icon, 0))
 elif cmd == "delete":
+    token = getToken()
     id = sys.argv[2]
-    print(t.deleteTrackr(token, id, 0));
+    print(t.deleteTrackr(token, id, 0))
     
                                             
+#

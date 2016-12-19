@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import requests
 
@@ -12,7 +12,7 @@ class Trackr:
     def getFeatureVersion(self,token):
         params = {"usertoken":token}
         r = requests.get(restbase + "user/featureversion", params = params)
-        return r.content
+        return r.json()
     def getUsersInRadius(self, lat, lon):
         data = {
             "searchLocation" : {
@@ -24,7 +24,7 @@ class Trackr:
         return r.content
     def getTracker(self,token,itemid):
         params = {"usertoken":token}    
-        r = requests.get(restbase + "tracker/secure/%s" % itemid, params=params)
+        r = requests.get(restbase + "tracker/secure/{}".format(itemid), params=params)
         return r.json()
     def getTrackers(self,token):
         params = {"usertoken":token}
@@ -56,76 +56,9 @@ class Trackr:
         return r.json()
     def deleteTrackr(self, token, itemid, deltasync):
         params = {"usertoken":token, "timeElapsedSync":deltasync}
-        r = requests.delete(restbase + "item/%s" % itemid, params=params)
+        r = requests.delete(restbase + "item/{}".format(itemid), params=params)
         return r.content
 
-
-
-
-if __name__ == "__main__":
-    import sys
-    import pprint
-
-    if len(sys.argv) > 1:
-        lat = float(sys.argv[1])
-    else:
-        lat = 59.44586
-
-    if len(sys.argv) > 2:
-        lon=float(sys.argv[2])
-    else:
-        lon = 18.134482
-
-    if len(sys.argv) > 3:
-        user=sys.argv[3]
-    else:
-        print "Trackr username: ",
-        user=sys.stdin.readline().rstrip("\n")
-        print "\r",
-        
-    if len(sys.argv) > 4:
-        password=sys.argv[4]
-    else:
-        print "Trackr password: ",
-        password=sys.stdin.readline().rstrip("\n")
-        print "\r",
-    
-    pp=pprint.PrettyPrinter(indent=4)
-    t = Trackr()
-
-    try: token
-    except NameError:
-        print "Getting token for " + user
-        token = t.getToken(user, password)
-    print("Got Token:" + token)
-
-
-    print("FeatureVersion: %s" % t.getFeatureVersion(token))
-    print("UsersInRadius:  %s" % t.getUsersInRadius(lat, lon))
-
-    tracker = t.getTrackerByName(token, "TestTracker")
-    if False:
-        if tracker:
-            print("Deleting tracker")
-            t.deleteTrackr(token, tracker['trackerId'], 0)
-            tracker = None
-
-    if not tracker:
-        print("Creating tracker")
-        ttid = t.createItemWithTracker(token, "TestTracker", "Bluetooth",
-                                       "00000042-00000001", "trackr", 0)
-    else:
-        ttid = tracker['trackerId']
-
-    print "Updating tracker %s" % ttid
-    print(t.updateTracker(ttid, 99, 58.51234, 13.51234, False, 1))
-
-
-    print("Tracker %s: " % ttid);
-    pp.pprint(t.getTracker(token, ttid))
-    trackers=t.getTrackers(token)
-    print("Trackers:")
-    pp.pprint(trackers)
 
 
 
