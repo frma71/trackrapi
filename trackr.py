@@ -53,8 +53,8 @@ class Trackr:
             "clientTimeDiff":timeDiff
             }]
         r = requests.put(restbase + "tracker/batch/secure/$2a$10$Rif.csF02tlXv5OVOBiWauXpGN6lrdWIc5A9cr2V7yCVIhIHt0.SG" , json=data)
-        return r.content
-    def deleteTrackr(self, usertoken, itemid, deltasync):
+        return r.json()
+    def deleteTrackr(self, token, itemid, deltasync):
         params = {"usertoken":token, "timeElapsedSync":deltasync}
         r = requests.delete(restbase + "item/%s" % itemid, params=params)
         return r.content

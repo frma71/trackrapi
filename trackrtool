@@ -1,0 +1,76 @@
+#!/usr/bin/python
+
+import trackr
+import sys
+import pprint
+import os
+
+cmd = sys.argv[1]
+
+t = trackr.Trackr()
+pp=pprint.PrettyPrinter(indent=4)
+
+try:
+    token = os.environ["TRACKR_TOKEN"]
+except KeyError:
+    token = None
+
+
+if not token:
+    try:
+        user=os.environ["TRACKR_USER"]
+    except KeyError:
+        print "Trackr username: ",
+        user=sys.stdin.readline().rstrip("\n")
+        print "\r",
+        
+    try:    
+        password=os.environ["TRACKR_PASSWORD"]
+    except KeyError:
+        print "Trackr password: ",
+        password=sys.stdin.readline().rstrip("\n")
+        print "\r",
+        print "Getting token for " + user
+    token = t.getToken(user, password)
+print("Got Token:" + token)
+
+
+
+
+if cmd == "list":
+    trackers=t.getTrackers(token)
+    for tracker in trackers:
+        print "%-20s %-20s %3d%% at %.5f,%.5f %s" % (
+            tracker['customName'],
+            tracker['trackerId'],
+            int(tracker['batteryLevel']),
+            float(tracker['lastKnownLocation']['latitude']),
+            float(tracker['lastKnownLocation']['longitude']),
+            tracker['lastTimeSeen'])
+elif cmd == "get":
+    tracker=t.getTracker(token,sys.argv[2])
+    for k in tracker:
+        print "%s: %s" % (k, tracker[k])
+elif cmd == "set":
+    id = sys.argv[2]
+    bat = int(sys.argv[3])
+    lat = float(sys.argv[4])
+    lon = float(sys.argv[5])
+    con = (int(sys.argv[6]) != 0)
+        
+    r=t.updateTracker(id, bat, lat, lon, con, 0)
+    if r[0] == id:
+        print("Success")
+    else:
+        print("Fail")
+elif cmd == "create":
+    name = sys.argv[2]
+    type = sys.argv[3]
+    id = sys.argv[4]
+    icon = sys.argv[5]
+    print(t.createItemWithTracker(token, name, type, id, icon, 0))
+elif cmd == "delete":
+    id = sys.argv[2]
+    print(t.deleteTrackr(token, id, 0));
+    
+                                            
